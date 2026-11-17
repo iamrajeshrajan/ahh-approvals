@@ -25,7 +25,19 @@ It runs on Cloudflare Pages (the site and API), D1 (the database) and R2 (upload
 
 ---
 
-## One-time set-up in Cloudflare (Krayons account)
+## Current set-up (17 Nov 2026)
+
+Claude set this up through the Cloudflare connection on the account `Rajesh@crossover.co.in's Account`:
+
+- **Done:** the D1 database `ahh-approvals` (ID `19ac32fd-cb4e-4ee5-a329-b7d3ae5704d5`), with tables and starting users created.
+- **Done:** the Pages project `ahh-approvals`, connected to this repository. Every push to `main` deploys automatically to https://ahh-approvals.pages.dev.
+- **Done:** a one-time password link for Raj. The setup code in step 4 below isn't needed.
+- **Waiting:** R2 file storage has to be switched on in the dashboard first. Until then, uploading creatives shows a "not switched on yet" message. Once it's on, create the bucket `ahh-approvals-media` and un-comment the `[[r2_buckets]]` block in `wrangler.toml`.
+- **Waiting:** the custom domain `ahh.krayonsdigital.com` is added to the project. It goes live once a CNAME record `ahh` → `ahh-approvals.pages.dev` exists at krayonsdigital.com's DNS provider. That domain isn't on this Cloudflare account.
+
+The steps below are the full manual route, kept for reference.
+
+## One-time set-up in Cloudflare (manual route)
 
 These steps are done once, while signed in to the Krayons Cloudflare account.
 
