@@ -67,7 +67,7 @@
   };
 
   // ---------- state
-  const S = { me: null, posts: [], view: 'list', tab: 'mine', month: null, channel: 'all', q: '', page: 'board' };
+  const S = { me: null, posts: [], view: 'list', tab: 'mine', month: null, channel: 'all', q: '', page: (location.hash.match(/^#\/(\w+)$/) || [])[1] || 'approvals' };
 
   const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -83,6 +83,8 @@
     const hash = location.hash.replace(/^#\/?/, '');
     if (hash.startsWith('set-password/')) return renderSetPassword(hash.split('/')[1]);
     if (hash === 'setup') return renderSetup();
+    const tab = hash.match(/^(\w+)$/);
+    if (S.me && tab) { if (S.page !== tab[1]) { S.page = tab[1]; render(); } return; }
     start();
   }
   window.addEventListener('hashchange', route);
@@ -116,7 +118,7 @@
       e.preventDefault(); msg.textContent = '';
       try { await api('login', { method: 'POST', body: { username: u.value, password: p.value } }); start(); } catch (err) { msg.textContent = err.message; }
     } }, h('label', {}, 'Username'), u, h('label', {}, 'Password'), p, h('button', { class: 'btn primary', type: 'submit' }, 'Sign in'), msg);
-    $app.replaceChildren(authShell('Post approvals', 'A Hundred Hands × Krayons Digital. Sign in to review and approve posts.', f));
+    $app.replaceChildren(authShell('Krayons–AHH dashboard', 'A Hundred Hands × Krayons Digital. Sign in to review posts and track the work.', f));
     u.focus();
   }
   async function renderSetPassword(token) {
@@ -155,24 +157,32 @@
 
   // ---------- main shell
   function topBar() {
-    const isAdmin = S.me.role === 'admin';
-    const nav = h('div', { class: 'nav' },
-      h('button', { class: S.page === 'board' ? 'on' : '', onclick: () => { S.page = 'board'; render(); } }, 'Posts'),
-      isAdmin && h('button', { class: S.page === 'users' ? 'on' : '', onclick: () => { S.page = 'users'; render(); } }, 'People'),
-      isAdmin && h('button', { class: S.page === 'import' ? 'on' : '', onclick: () => { S.page = 'import'; render(); } }, 'Import'));
-    return h('div', { class: 'top' }, h('div', { class: 'top-in' },
+    const tabs = TABS.filter((t) => t.show(S.me));
+    const tabBtn = (t) => h('button', { class: S.page === t.id ? 'on' : '', onclick: () => { S.page = t.id; location.hash = '#/' + t.id; render(); } }, t.label);
+    const main = tabs.filter((t) => !t.settings), settings = tabs.filter((t) => t.settings);
+    const tabBar = h('div', { class: 'tabbar' }, h('div', { class: 'tabbar-in' },
+      h('div', { class: 'tabs' }, main.map(tabBtn)), h('div', { class: 'spacer' }),
+      settings.length ? h('div', { class: 'tabs settings' }, settings.map(tabBtn)) : null));
+    return [h('div', { class: 'top' }, h('div', { class: 'top-in' },
       h('div', { class: 'brand' }, h('img', { class: 'ahh', src: '/img/ahh-logo.png', alt: 'A Hundred Hands' }),
-        h('div', {}, h('div', { class: 't' }, 'Post approvals'), h('div', { class: 's' }, 'A Hundred Hands × Krayons Digital'))),
-      nav, h('div', { class: 'spacer' }),
+        h('div', {}, h('div', { class: 't' }, 'Krayons–AHH dashboard'), h('div', { class: 's' }, 'A Hundred Hands × Krayons Digital'))),
+      h('div', { class: 'spacer' }),
       h('div', { class: 'who' }, h('div', {}, S.me.name), h('div', {}, roleName(S.me.role))),
       h('button', { class: 'btn small', onclick: async () => { await api('logout', { method: 'POST', body: {} }); S.me = null; renderLogin(); } }, 'Sign out'),
-      h('img', { class: 'kr', src: '/img/krayons-mark.png', alt: 'Krayons Digital', style: 'height:30px' })));
+      h('img', { class: 'kr', src: '/img/krayons-mark.png', alt: 'Krayons Digital', style: 'height:30px' }))), tabBar];
   }
   const roleName = (r) => ({ admin: 'Krayons · approves first', editor: 'Krayons · prepares posts', approver: 'AHH · approves', viewer: 'AHH · view only' }[r]);
 
+  // Dashboard tabs. New tabs (insights, spends, achievements) are added here with their own render function.
+  const TABS = [
+    { id: 'approvals', label: 'Post approvals', show: () => true, render: () => renderBoard() },
+    { id: 'people', label: 'People', settings: true, show: (me) => me.role === 'admin', render: () => renderUsers() },
+    { id: 'import', label: 'Import', settings: true, show: (me) => me.role === 'admin', render: () => renderImport() },
+  ];
   function render() {
-    const body = S.page === 'users' ? renderUsers() : S.page === 'import' ? renderImport() : renderBoard();
-    $app.replaceChildren(topBar(), h('div', { class: 'wrap' }, body));
+    const tab = TABS.find((t) => t.id === S.page && t.show(S.me)) || TABS[0];
+    S.page = tab.id;
+    $app.replaceChildren(...topBar(), h('div', { class: 'wrap' }, tab.render()));
   }
 
   // ---------- board

@@ -27,6 +27,16 @@ a { color: var(--or-dk); }
 
 .wrap { max-width: 1240px; margin: 0 auto; padding: 20px; }
 
+/* dashboard tabs */
+.tabbar { background: var(--card); border-bottom: 1px solid var(--line); }
+.tabbar-in { max-width: 1240px; margin: 0 auto; display: flex; align-items: flex-end; padding: 0 20px; }
+.tabs { display: flex; gap: 2px; }
+.tabs button { border: 0; background: none; padding: 10px 16px 11px; cursor: pointer; color: var(--ink-2); border-bottom: 3px solid transparent; font-weight: 600; }
+.tabs button.on { color: var(--or-dk); border-bottom-color: var(--or); }
+.tabs.settings button { font-weight: 400; font-size: 14px; color: var(--mid); }
+.tabs.settings button.on { color: var(--or-dk); }
+@media (max-width: 720px) { .tabbar-in { padding: 0 8px; overflow-x: auto; } .tabs button { padding: 10px 10px; } }
+
 /* buttons */
 .btn { border: 1px solid var(--line); background: var(--card); padding: 8px 14px; border-radius: 8px; cursor: pointer; }
 .btn:hover { border-color: #cbbcb2; }

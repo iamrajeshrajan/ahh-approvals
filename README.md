@@ -1,6 +1,6 @@
-# A Hundred Hands · Post approvals
+# Krayons–AHH dashboard
 
-A small web app where Krayons Digital and A Hundred Hands (AHH) review and approve Instagram posts.
+A small web app for Krayons Digital and A Hundred Hands (AHH). Its first tab, **Post approvals**, is where both sides review and approve Instagram posts. More tabs (insights, spends, achievements) can be added in `public/app.js` (the `TABS` list).
 
 **How a post moves**
 
@@ -32,7 +32,7 @@ Claude set this up through the Cloudflare connection on the account `Rajesh@cros
 - **Done:** the D1 database `ahh-approvals` (ID `19ac32fd-cb4e-4ee5-a329-b7d3ae5704d5`), with tables and starting users created.
 - **Done:** the Pages project `ahh-approvals`, connected to this repository. Every push to `main` deploys automatically to https://ahh-approvals.pages.dev.
 - **Done:** a one-time password link for Raj. The setup code in step 4 below isn't needed.
-- **Waiting:** R2 file storage has to be switched on in the dashboard first. Until then, uploading creatives shows a "not switched on yet" message. Once it's on, create the bucket `ahh-approvals-media` and un-comment the `[[r2_buckets]]` block in `wrangler.toml`.
+- **Done:** R2 file storage, with the bucket `ahh-approvals-media` (APAC), connected as `MEDIA`.
 - **Waiting:** the custom domain `ahh.krayonsdigital.com` is added to the project. It goes live once a CNAME record `ahh` → `ahh-approvals.pages.dev` exists at krayonsdigital.com's DNS provider. That domain isn't on this Cloudflare account.
 
 The steps below are the full manual route, kept for reference.
