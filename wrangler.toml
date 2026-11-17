@@ -5,10 +5,10 @@ compatibility_date = "2026-11-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "ahh-approvals"
-# Replace with the Database ID shown in Cloudflare > Storage & Databases > D1 > ahh-approvals
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "19ac32fd-cb4e-4ee5-a329-b7d3ae5704d5"
 migrations_dir = "migrations"
 
-[[r2_buckets]]
-binding = "MEDIA"
-bucket_name = "ahh-approvals-media"
+# File storage for creatives. Switched on once R2 is enabled on the Cloudflare account:
+# [[r2_buckets]]
+# binding = "MEDIA"
+# bucket_name = "ahh-approvals-media"

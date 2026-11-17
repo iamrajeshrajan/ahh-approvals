@@ -223,7 +223,7 @@ async function handle(request, env, parts) {
 
     if (!sub && method === 'DELETE') {
       if (me.role !== 'admin') return err(403, 'Only the admin can delete');
-      if (post.media_key) await env.MEDIA.delete(post.media_key);
+      if (post.media_key && env.MEDIA) await env.MEDIA.delete(post.media_key);
       await env.DB.batch([env.DB.prepare(`DELETE FROM events WHERE post_id = ?`).bind(id), env.DB.prepare(`DELETE FROM posts WHERE id = ?`).bind(id)]);
       return json({ ok: true });
     }
@@ -261,6 +261,7 @@ async function handle(request, env, parts) {
 
     if (sub === 'media' && method === 'PUT') {
       if (!canEdit(me)) return err(403, 'Not allowed');
+      if (!env.MEDIA) return err(503, 'File storage is not switched on yet. Ask Raj to enable R2 in Cloudflare.');
       const type = request.headers.get('content-type') || '';
       if (!/^(image\/(jpeg|png|webp|gif)|video\/(mp4|quicktime|webm))$/.test(type)) return err(415, 'Upload a JPG, PNG, WebP, GIF, MP4, MOV or WebM file');
       const len = Number(request.headers.get('content-length') || 0);
@@ -276,6 +277,7 @@ async function handle(request, env, parts) {
 
     if (sub === 'media' && method === 'GET') {
       if (!post.media_key) return err(404, 'No file');
+      if (!env.MEDIA) return err(503, 'File storage is not switched on yet');
       const range = request.headers.get('range');
       let obj;
       if (range) {
