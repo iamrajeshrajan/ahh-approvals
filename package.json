@@ -1,0 +1,14 @@
+{
+  "name": "ahh-approvals",
+  "private": true,
+  "version": "1.0.0",
+  "description": "A Hundred Hands post approval board (Krayons Digital)",
+  "scripts": {
+    "dev": "wrangler pages dev public --d1 DB --r2 MEDIA --port 8788",
+    "db:local": "wrangler d1 migrations apply ahh-approvals --local",
+    "db:remote": "wrangler d1 migrations apply ahh-approvals --remote"
+  },
+  "devDependencies": {
+    "wrangler": "4.163.0"
+  }
+}
