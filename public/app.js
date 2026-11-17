@@ -176,6 +176,8 @@
   // Dashboard tabs. New tabs (insights, spends, achievements) are added here with their own render function.
   const TABS = [
     { id: 'approvals', label: 'Post approvals', show: () => true, render: () => renderBoard() },
+    { id: 'insights', label: 'Insights', show: () => true, render: () => renderInsights() },
+    { id: 'spends', label: 'Spends', show: () => true, render: () => renderSpends() },
     { id: 'people', label: 'People', settings: true, show: (me) => me.role === 'admin', render: () => renderUsers() },
     { id: 'import', label: 'Import', settings: true, show: (me) => me.role === 'admin', render: () => renderImport() },
   ];
@@ -414,6 +416,133 @@
     const shade = h('div', { class: 'shade', onclick: (e) => { if (e.target === shade) closeDrawer(); } }, drawer);
     closeDrawer();
     document.body.append(shade);
+  }
+
+  // ---------- shared helpers for insights and spends
+  const nf = (n) => (n === null || n === undefined ? '–' : Number(n).toLocaleString('en-IN', { maximumFractionDigits: 0 }));
+  const rs = (n) => '₹' + nf(n);
+  const shortD = (s) => { const d = parseD(s); return `${d.getUTCDate()} ${MON[d.getUTCMonth()]}`; };
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  function svg(tag, attrs, ...kids) { const el = document.createElementNS(SVGNS, tag); for (const [k, v] of Object.entries(attrs || {})) el.setAttribute(k, v); for (const k of kids.flat()) if (k) el.append(k instanceof Node ? k : document.createTextNode(String(k))); return el; }
+  // Line or bar chart over dates. series: [{label, color, points: [{d, v}], dashed, bars}]
+  function chart(series, { height = 220, yFmt = nf } = {}) {
+    const narrow = window.innerWidth < 720, W = narrow ? 400 : 860, H = narrow ? Math.round(height * 0.8) : height, L = narrow ? 52 : 64, R = 12, T = 14, B = 30;
+    const all = series.flatMap((s) => s.points).filter((p) => p.v !== null && p.v !== undefined);
+    if (!all.length) return h('div', { class: 'empty', style: 'padding:24px' }, 'No data yet');
+    const ds = [...new Set(all.map((p) => p.d))].sort();
+    const t0 = parseD(ds[0]).getTime(), t1 = parseD(ds[ds.length - 1]).getTime() || t0 + 1;
+    const hasBars = series.some((s) => s.bars);
+    const slot = (W - L - R) / Math.max(ds.length, 1), inset = hasBars ? slot / 2 : 0;
+    const X = (d) => L + inset + ((parseD(d).getTime() - t0) / Math.max(t1 - t0, 86400000)) * (W - L - R - 2 * inset);
+    let lo = Math.min(...all.map((p) => p.v)), hi = Math.max(...all.map((p) => p.v));
+    if (hasBars) lo = 0;
+    if (lo === hi) { lo = lo * 0.95; hi = hi * 1.05 + 1; }
+    const pad = (hi - lo) * 0.08; lo = Math.max(0, lo - pad); hi += pad;
+    const Y = (v) => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
+    const g = svg('svg', { viewBox: `0 0 ${W} ${H}`, width: '100%', role: 'img' });
+    for (let i = 0; i <= 4; i++) { const v = lo + ((hi - lo) * i) / 4, y = Y(v); g.append(svg('line', { x1: L, x2: W - R, y1: y, y2: y, stroke: '#e6ded8' }), svg('text', { x: L - 8, y: y + 4, 'text-anchor': 'end', 'font-size': 11, fill: '#6b5e57' }, yFmt(v))); }
+    const step = Math.max(1, Math.ceil(ds.length / (narrow ? 4 : 8)));
+    ds.forEach((d, i) => { if (i % step === 0 || i === ds.length - 1) g.append(svg('text', { x: X(d), y: H - 8, 'text-anchor': 'middle', 'font-size': 11, fill: '#6b5e57' }, shortD(d))); });
+    for (const s of series) {
+      const pts = s.points.filter((p) => p.v !== null && p.v !== undefined);
+      if (s.bars) {
+        const bw = Math.min(28, Math.max(2, slot * 0.7));
+        for (const p of pts) g.append(svg('rect', { x: X(p.d) - bw / 2, y: Y(p.v), width: bw, height: Math.max(0, Y(lo) - Y(p.v)), fill: s.color, rx: 2 }, svg('title', {}, `${shortD(p.d)}: ${yFmt(p.v)}`)));
+      } else {
+        g.append(svg('path', { d: pts.map((p, i) => `${i ? 'L' : 'M'}${X(p.d)},${Y(p.v)}`).join(''), fill: 'none', stroke: s.color, 'stroke-width': s.dashed ? 1.5 : 2.5, 'stroke-dasharray': s.dashed ? '6 5' : '' }));
+        if (!s.dashed) for (const p of pts) g.append(svg('circle', { cx: X(p.d), cy: Y(p.v), r: 3, fill: s.color }, svg('title', {}, `${shortD(p.d)}: ${yFmt(p.v)}`)));
+      }
+    }
+    const legend = h('div', { class: 'legend' }, series.map((s) => h('span', {}, h('i', { style: `background:${s.color}${s.dashed ? ';opacity:.6' : ''}` }), s.label)));
+    return h('div', {}, legend, g);
+  }
+  function syncLine(sync) {
+    const when = sync ? new Date(sync.at * 1000).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Kolkata' }) : null;
+    const btn = S.me.role === 'admin' ? h('button', { class: 'btn small', onclick: async (e) => {
+      e.target.disabled = true; e.target.textContent = 'Syncing…';
+      try { const r = await api('sync', { method: 'POST', body: {} }); toast(r.ok ? 'Synced from Meta' : 'Sync finished with problems'); render(); } catch (er) { toast(er.message); e.target.disabled = false; e.target.textContent = 'Sync now'; }
+    } }, 'Sync now') : null;
+    return h('div', { class: 'bar' },
+      h('span', { class: 'cap' }, sync ? `Updated from Meta ${when}${sync.ok ? '' : ' · with problems'}` : 'Not connected to Meta yet'), btn,
+      S.me.org === 'krayons' && sync && !sync.ok ? h('span', { style: 'font-size:12px;color:#b3261e' }, sync.detail) : null);
+  }
+
+  // ---------- insights
+  function renderInsights() {
+    const box = h('div', {}, h('p', { class: 'loading' }, 'Loading…'));
+    (async () => {
+      let d; try { d = await api('insights'); } catch (e) { box.replaceChildren(h('div', { class: 'empty' }, e.message)); return; }
+      const out = [syncLine(d.sync)];
+      if (!d.daily.length && !d.media.length) {
+        out.push(h('div', { class: 'empty' }, 'Insights appear here after the first nightly sync from Meta. Krayons is connecting the Instagram account.'));
+        box.replaceChildren(...out); return;
+      }
+      const fol = d.daily.filter((x) => x.followers !== null);
+      const latest = fol.length ? fol[fol.length - 1] : null;
+      const tg = d.target;
+      const daysLeft = Math.max(0, Math.round((parseD(tg.target_date) - parseD(todayStr())) / 86400000));
+      const need = latest ? Math.max(0, tg.target - latest.followers) : null;
+      const sum = (arr, k) => arr.reduce((a, x) => a + (x[k] || 0), 0);
+      const last7 = d.daily.slice(-7), prev7 = d.daily.slice(-14, -7);
+      out.push(h('div', { class: 'tiles' },
+        h('div', { class: 'tile' }, h('div', { class: 'n' }, latest ? nf(latest.followers) : '–'), h('div', { class: 'l' }, latest ? `Followers on ${shortD(latest.date)} · ${latest.followers - tg.baseline >= 0 ? '+' : ''}${nf(latest.followers - tg.baseline)} since ${shortD(tg.baseline_date)}` : 'Followers')),
+        h('div', { class: 'tile hot' }, h('div', { class: 'n' }, need === null ? '–' : nf(need)), h('div', { class: 'l' }, `To reach ${nf(tg.target)} by ${shortD(tg.target_date)} · ${daysLeft ? nf(Math.ceil(need / daysLeft)) + ' a day' : 'deadline passed'}`)),
+        h('div', { class: 'tile' }, h('div', { class: 'n' }, nf(sum(last7, 'reach'))), h('div', { class: 'l' }, `Reach, last 7 days${prev7.length ? ` · previous 7: ${nf(sum(prev7, 'reach'))}` : ''}`)),
+        h('div', { class: 'tile' }, h('div', { class: 'n' }, nf(d.media.filter((m) => m.date >= last7[0]?.date).length)), h('div', { class: 'l' }, 'Feed posts, last 7 days'))));
+      // follower chart with the straight-line path to the target
+      const targetLine = [{ d: tg.baseline_date, v: tg.baseline }, { d: tg.target_date, v: tg.target }];
+      out.push(h('div', { class: 'panel' }, h('h2', { class: 'ph' }, 'Followers against the 100k target'),
+        chart([{ label: 'Followers', color: '#e96023', points: fol.map((x) => ({ d: x.date, v: x.followers })) }, { label: 'Path to 100k by 14 Feb', color: '#2f6f6a', dashed: true, points: targetLine }])));
+      out.push(h('div', { class: 'panel' }, h('h2', { class: 'ph' }, 'Daily reach'),
+        chart([{ label: 'Accounts reached', color: '#e96023', bars: true, points: d.daily.slice(-45).map((x) => ({ d: x.date, v: x.reach })) }])));
+      if (d.series.length) out.push(h('div', { class: 'panel' }, h('h2', { class: 'ph' }, 'Which series works best'),
+        h('div', { class: 'tscroll' }, h('table', { class: 't' }, h('thead', {}, h('tr', {}, ['Series', 'Posts', 'Avg reach', 'Avg views', 'Avg saves', 'Avg shares'].map((t) => h('th', {}, t)))),
+          h('tbody', {}, [...d.series].sort((a, b) => (a.series === 'Not linked') - (b.series === 'Not linked')).map((r) => h('tr', {}, h('td', {}, r.series), h('td', {}, nf(r.posts)), h('td', {}, nf(r.avg_reach)), h('td', {}, nf(r.avg_views)), h('td', {}, nf(r.avg_saved)), h('td', {}, nf(r.avg_shares)))))))));
+      out.push(h('div', { class: 'panel' }, h('h2', { class: 'ph' }, 'Posts and their results'),
+        h('div', { class: 'media-list' }, d.media.map((m) => h('a', { class: 'mrow', href: m.permalink || '#', target: '_blank', rel: 'noopener' },
+          m.thumbnail_url ? h('img', { src: m.thumbnail_url, alt: '', loading: 'lazy', onerror: (e) => e.target.replaceWith(h('div', { class: 'noimg' }, m.product_type === 'REELS' ? 'Reel' : 'Post')) }) : h('div', { class: 'noimg' }, m.product_type === 'REELS' ? 'Reel' : 'Post'),
+          h('div', { class: 'mt' }, h('div', { class: 'mtt' }, m.post_title || (m.caption || '').slice(0, 80) || 'Instagram post'),
+            h('div', { class: 'mmeta' }, `${fmtD(m.date)} · ${m.product_type === 'REELS' ? 'Reel' : (m.media_type || '').toLowerCase().replace('_', ' ')}`, m.post_series ? ` · ${m.post_series}` : '', m.post_id ? '' : ' · not on the board', m.post_boost ? ' · boosted' : '')),
+          h('div', { class: 'mnums' }, [['Reach', m.reach], ['Views', m.views], ['Likes', m.like_count], ['Comments', m.comments_count], ['Saves', m.saved], ['Shares', m.shares]].map(([k, v]) => h('div', {}, h('b', {}, nf(v)), h('span', {}, k)))))))));
+      box.replaceChildren(...out);
+    })();
+    return box;
+  }
+
+  // ---------- spends
+  function renderSpends() {
+    const box = h('div', {}, h('p', { class: 'loading' }, 'Loading…'));
+    (async () => {
+      let d, ins; try { [d, ins] = await Promise.all([api('spends'), api('insights')]); } catch (e) { box.replaceChildren(h('div', { class: 'empty' }, e.message)); return; }
+      const out = [syncLine(ins.sync)];
+      const planned = d.plan.reduce((a, p) => a + p.amount, 0), spent = d.campaigns.reduce((a, c) => a + (c.spend || 0), 0);
+      const thisMonth = d.monthly.find((m) => m.month === todayStr().slice(0, 7));
+      out.push(h('div', { class: 'tiles' },
+        h('div', { class: 'tile' }, h('div', { class: 'n' }, rs(spent)), h('div', { class: 'l' }, 'Spent on Meta ads so far')),
+        h('div', { class: 'tile' }, h('div', { class: 'n' }, rs(thisMonth ? thisMonth.spend : 0)), h('div', { class: 'l' }, `Spent in ${monthName(todayStr().slice(0, 7))}`)),
+        h('div', { class: 'tile' }, h('div', { class: 'n' }, rs(planned)), h('div', { class: 'l' }, 'Planned, 19 Nov – 14 Feb')),
+        h('div', { class: 'tile' }, h('div', { class: 'n' }, rs(Math.max(0, planned - spent))), h('div', { class: 'l' }, 'Left in the plan'))));
+      const today = todayStr();
+      out.push(h('div', { class: 'panel' }, h('h2', { class: 'ph' }, 'Plan against actual'),
+        h('div', { class: 'tscroll' }, h('table', { class: 't' }, h('thead', {}, h('tr', {}, ['Campaign', 'Dates', 'Budget', 'Spent', 'Used', 'Clicks'].map((t) => h('th', {}, t)))),
+          h('tbody', {}, d.plan.map((p) => {
+            const days = Math.round((parseD(p.end_date) - parseD(p.start_date)) / 86400000) + 1;
+            const gone = today < p.start_date ? 0 : Math.min(days, Math.round((parseD(today) - parseD(p.start_date)) / 86400000) + 1);
+            const pct = p.amount ? Math.round((p.spent / p.amount) * 100) : 0, timePct = Math.round((gone / days) * 100);
+            return h('tr', {}, h('td', {}, h('strong', {}, p.name), h('div', { style: 'font-size:12px;color:#6b5e57' }, `Meta campaign name starts "${p.prefix}"`)),
+              h('td', {}, `${shortD(p.start_date)} – ${shortD(p.end_date)}`), h('td', {}, rs(p.amount)), h('td', {}, rs(p.spent)),
+              h('td', {}, h('div', { class: 'prog' }, h('i', { style: `width:${Math.min(pct, 100)}%;background:${pct > timePct + 15 ? '#b3261e' : '#e96023'}` })), h('div', { style: 'font-size:12px;color:#6b5e57' }, `${pct}% of budget · ${timePct}% of time`)),
+              h('td', {}, nf(p.clicks)));
+          }))))));
+      if (d.daily.length) out.push(h('div', { class: 'panel' }, h('h2', { class: 'ph' }, 'Daily spend'), chart([{ label: 'Spend (₹)', color: '#e96023', bars: true, points: d.daily.slice(-60).map((x) => ({ d: x.date, v: x.spend })) }], { yFmt: rs })));
+      out.push(h('div', { class: 'panel' }, h('h2', { class: 'ph' }, 'Campaigns in Meta'),
+        d.campaigns.length ? h('div', { class: 'tscroll' }, h('table', { class: 't' }, h('thead', {}, h('tr', {}, ['Campaign', 'Plan line', 'Running', 'Spend', 'Impressions', 'Clicks'].map((t) => h('th', {}, t)))),
+          h('tbody', {}, d.campaigns.map((c) => h('tr', {}, h('td', {}, c.campaign_name), h('td', {}, c.plan_line || h('span', { style: 'color:#b3261e' }, 'Not matched to the plan')),
+            h('td', {}, `${shortD(c.first_day)} – ${shortD(c.last_day)}`), h('td', {}, rs(c.spend)), h('td', {}, nf(c.impressions)), h('td', {}, nf(c.clicks)))))))
+          : h('div', { class: 'empty', style: 'padding:24px' }, 'No ad spend synced yet.')));
+      box.replaceChildren(...out);
+    })();
+    return box;
   }
 
   // ---------- people (admin)

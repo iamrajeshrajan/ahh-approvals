@@ -149,7 +149,27 @@ table.t th { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; 
 .copy { font-family: ui-monospace, Menlo, monospace; font-size: 12px; background: var(--bg); padding: 8px; border-radius: 6px; word-break: break-all; margin-top: 6px; }
 .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 10px 16px; border-radius: 10px; z-index: 40; font-size: 14px; }
 
+/* insights and spends */
+.tscroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.tscroll table { min-width: 560px; }
+.ph { font-size: 17px; margin-bottom: 10px; }
+.legend { display: flex; gap: 16px; font-size: 12px; color: var(--mid); margin-bottom: 4px; }
+.legend i { display: inline-block; width: 12px; height: 3px; margin-right: 6px; vertical-align: middle; border-radius: 2px; }
+.prog { height: 8px; background: var(--bg); border-radius: 999px; overflow: hidden; min-width: 120px; }
+.prog i { display: block; height: 100%; }
+.media-list { display: flex; flex-direction: column; }
+.mrow { display: grid; grid-template-columns: 64px 1fr auto; gap: 14px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); color: inherit; text-decoration: none; }
+.mrow:hover { background: var(--bg); }
+.mrow img, .mrow .noimg { width: 64px; height: 64px; object-fit: cover; border-radius: 8px; background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--mid); }
+.mtt { font-weight: 600; }
+.mmeta { font-size: 12px; color: var(--mid); margin-top: 2px; }
+.mnums { display: grid; grid-template-columns: repeat(6, 64px); text-align: right; }
+.mnums b { display: block; font-size: 15px; }
+.mnums span { font-size: 11px; color: var(--mid); }
+
 @media (max-width: 720px) {
+  .mrow { grid-template-columns: 48px 1fr; } .mrow img, .mrow .noimg { width: 48px; height: 48px; }
+  .mnums { grid-column: 1 / -1; grid-template-columns: repeat(3, 1fr); text-align: left; gap: 6px; }
   .top-in { flex-wrap: wrap; padding: 10px 14px; }
   .brand .s { display: none; }
   .wrap { padding: 14px; }

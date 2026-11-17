@@ -12,3 +12,8 @@ migrations_dir = "migrations"
 [[r2_buckets]]
 binding = "MEDIA"
 bucket_name = "ahh-approvals-media"
+
+# Nightly Meta sync job (separate Worker in sync-worker/), reached only through this binding
+[[services]]
+binding = "SYNC"
+service = "ahh-insights-sync"

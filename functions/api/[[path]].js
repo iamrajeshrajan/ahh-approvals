@@ -299,6 +299,49 @@ async function handle(request, env, parts) {
     }
   }
 
+  // ----- insights (Instagram organic)
+  if (route === 'insights' && method === 'GET') {
+    const last = await env.DB.prepare(`SELECT at, ok, detail FROM sync_log ORDER BY id DESC LIMIT 1`).first().catch(() => null);
+    const { results: daily } = await env.DB.prepare(`SELECT date, followers, reach, views FROM ig_daily WHERE date >= '2026-11-01' ORDER BY date`).all();
+    const { results: media } = await env.DB.prepare(
+      `SELECT m.id, m.posted_at, m.date, m.media_type, m.product_type, m.caption, m.permalink, m.thumbnail_url, m.like_count, m.comments_count,
+              m.reach, m.views, m.saved, m.shares, m.total_interactions, m.post_id, p.title AS post_title, p.series AS post_series, p.boost AS post_boost
+       FROM ig_media m LEFT JOIN posts p ON p.id = m.post_id ORDER BY m.posted_at DESC LIMIT 120`).all();
+    const { results: series } = await env.DB.prepare(
+      `SELECT COALESCE(p.series, 'Not linked') AS series, COUNT(*) AS posts, ROUND(AVG(m.reach)) AS avg_reach, ROUND(AVG(m.views)) AS avg_views,
+              ROUND(AVG(m.saved)) AS avg_saved, ROUND(AVG(m.shares)) AS avg_shares
+       FROM ig_media m LEFT JOIN posts p ON p.id = m.post_id WHERE m.reach IS NOT NULL GROUP BY 1 ORDER BY avg_reach DESC`).all();
+    return json({
+      sync: last ? { at: last.at, ok: !!last.ok, detail: isKrayons(me) ? last.detail : undefined } : null,
+      target: { baseline: 85700, baseline_date: '2026-11-04', target: 100000, target_date: '2027-02-14' },
+      daily, media, series,
+    });
+  }
+
+  // ----- spends (Meta Ads)
+  if (route === 'spends' && method === 'GET') {
+    const { results: plan } = await env.DB.prepare(
+      `SELECT b.id, b.name, b.prefix, b.amount, b.start_date, b.end_date,
+              COALESCE((SELECT SUM(a.spend) FROM ad_daily a WHERE a.campaign_name LIKE b.prefix || '%' AND a.date BETWEEN b.start_date AND b.end_date), 0) AS spent,
+              COALESCE((SELECT SUM(a.impressions) FROM ad_daily a WHERE a.campaign_name LIKE b.prefix || '%' AND a.date BETWEEN b.start_date AND b.end_date), 0) AS impressions,
+              COALESCE((SELECT SUM(a.clicks) FROM ad_daily a WHERE a.campaign_name LIKE b.prefix || '%' AND a.date BETWEEN b.start_date AND b.end_date), 0) AS clicks
+       FROM ad_budget b ORDER BY b.start_date, b.id`).all();
+    const { results: campaigns } = await env.DB.prepare(
+      `SELECT campaign_id, campaign_name, MIN(date) AS first_day, MAX(date) AS last_day, SUM(spend) AS spend, SUM(impressions) AS impressions, SUM(clicks) AS clicks,
+              (SELECT b.name FROM ad_budget b WHERE ad_daily.campaign_name LIKE b.prefix || '%' LIMIT 1) AS plan_line
+       FROM ad_daily GROUP BY campaign_id ORDER BY spend DESC`).all();
+    const { results: daily } = await env.DB.prepare(`SELECT date, SUM(spend) AS spend FROM ad_daily GROUP BY date ORDER BY date`).all();
+    const { results: monthly } = await env.DB.prepare(`SELECT substr(date, 1, 7) AS month, SUM(spend) AS spend, SUM(impressions) AS impressions, SUM(clicks) AS clicks FROM ad_daily GROUP BY 1 ORDER BY 1`).all();
+    return json({ plan, campaigns, daily, monthly });
+  }
+
+  if (route === 'sync' && method === 'POST') {
+    if (me.role !== 'admin') return err(403, 'Only the admin can run a sync');
+    if (!env.SYNC) return err(503, 'The Meta sync is not connected yet');
+    const r = await env.SYNC.fetch('https://sync/run', { method: 'POST' });
+    return json(await r.json());
+  }
+
   // ----- users (admin)
   if (route === 'users' && method === 'GET') {
     if (me.role !== 'admin') return err(403, 'Not allowed');
