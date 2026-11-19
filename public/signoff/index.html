@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>AHH November Sign-off</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: one narrow column of post cards, a sticky progress bar at the bottom, send panel at the end */
+:root{
+  --bg:#f7f4f1; --surface:#ffffff; --fg:#1f1a17; --muted:#6f655e; --line:#e4ddd6;
+  --accent:#e2581a; --accent-ink:#ffffff; --accent-soft:#fdeee5;
+  --ok:#1d7a3c; --ok-soft:#e1f3e6; --warn:#a24d00; --warn-soft:#fdebd6; --bad:#c0262d; --bad-soft:#fde4e4;
+  --info:#2453a8; --info-soft:#e7eefb;
+  --display:"Space Grotesk",system-ui,sans-serif; --body:Inter,system-ui,-apple-system,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#171412; --surface:#221e1b; --fg:#f1ece8; --muted:#a89d95; --line:#3a332e;
+  --accent:#f06a2c; --accent-ink:#1a0d05; --accent-soft:#3a2316;
+  --ok:#5cc97e; --ok-soft:#173523; --warn:#f0a35a; --warn-soft:#3b2814; --bad:#ff7a7f; --bad-soft:#3d1a1c;
+  --info:#8fb1f5; --info-soft:#1b2640; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#171412; --surface:#221e1b; --fg:#f1ece8; --muted:#a89d95; --line:#3a332e;
+  --accent:#f06a2c; --accent-ink:#1a0d05; --accent-soft:#3a2316;
+  --ok:#5cc97e; --ok-soft:#173523; --warn:#f0a35a; --warn-soft:#3b2814; --bad:#ff7a7f; --bad-soft:#3d1a1c;
+  --info:#8fb1f5; --info-soft:#1b2640; color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+.wrap{max-width:720px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0}
+h1{font-size:30px;line-height:1.1}
+h2{font-size:21px;margin:34px 0 12px}
+h3{font-size:18px;line-height:1.25}
+.hero{padding-block:28px 8px}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.lead{color:var(--muted);margin:10px 0 0}
+.how{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-top:18px}
+.how ol{margin:6px 0 0;padding-left:20px}.how li{margin-bottom:4px}
+label.f{display:block;font-weight:600;margin:18px 0 6px}
+input[type=text],textarea{width:100%;font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:11px 12px}
+textarea{min-height:84px;resize:vertical}
+input:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px;scroll-margin-top:16px}
+.card.missing{border-color:var(--bad);box-shadow:0 0 0 2px var(--bad-soft)}
+.card.done-ok{border-color:color-mix(in srgb,var(--ok) 45%,var(--line))}
+.card.done-ch{border-color:color-mix(in srgb,var(--warn) 55%,var(--line))}
+.meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px;color:var(--muted);margin-bottom:6px}
+.meta .when{font-weight:600;color:var(--accent)}
+.pill{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:99px;white-space:nowrap}
+.pill.ready{background:var(--ok-soft);color:var(--ok)}.pill.build{background:var(--info-soft);color:var(--info)}
+.pill.input{background:var(--warn-soft);color:var(--warn)}.pill.story{background:var(--accent);color:var(--accent-ink)}
+.was{font-size:13px;color:var(--muted);margin-top:3px}.was s{opacity:.8}
+.note{font-size:14px;margin-top:8px}
+.strip{display:flex;gap:8px;overflow-x:auto;padding:10px 0 4px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+.strip figure{margin:0;flex:0 0 auto;width:118px;scroll-snap-align:start}
+.strip img{width:118px;aspect-ratio:9/16;object-fit:cover;border-radius:8px;display:block;background:var(--line)}
+.strip figcaption{font-size:11.5px;color:var(--muted);margin-top:4px;line-height:1.3}
+.strip figcaption b{color:var(--fg)}
+.swipe{font-size:12px;color:var(--muted)}
+details{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
+summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--accent);list-style:none;padding:4px 0}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"+ ";}
+details[open] summary::before{content:"– ";}
+.lbl{font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-top:12px}
+.txt{white-space:pre-line;font-size:14px;margin-top:3px;min-width:0;overflow-wrap:anywhere}
+.cap{background:var(--bg);border-radius:10px;padding:10px 12px}
+.choice{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.choice button{font:600 15px var(--body);padding:12px 8px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+.choice button[aria-pressed=true].ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.choice button[aria-pressed=true].ch{background:var(--warn);border-color:var(--warn);color:#fff}
+.remark{margin-top:10px}
+.err{color:var(--bad);font-size:13px;font-weight:600;margin-top:6px}
+.tbl{overflow-x:auto;margin-top:8px}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:13px}
+td,th{text-align:left;vertical-align:top;padding:7px 6px;border-bottom:1px solid var(--line)}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+td.nw{white-space:nowrap;font-variant-numeric:tabular-nums}
+.needs li{margin-bottom:8px}.needs .by{color:var(--muted);font-size:13px}
+.src p{font-size:13.5px;margin:6px 0}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);z-index:5;
+  padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.bar .in{max-width:720px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.prog{flex:1;min-width:0}
+.prog .t{font-size:13px;font-weight:600}
+.track{height:6px;background:var(--line);border-radius:99px;margin-top:5px;overflow:hidden}
+.track i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s}
+.btn{display:inline-flex;align-items:center;justify-content:center;font:700 15px var(--body);padding:12px 16px;border-radius:10px;border:0;background:var(--accent);color:var(--accent-ink);cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn.sec{background:var(--surface);color:var(--fg);border:1.5px solid var(--line)}
+.send{background:var(--surface);border:2px solid var(--accent);border-radius:14px;padding:18px 16px;margin-top:28px}
+.alert{background:var(--bad-soft);color:var(--fg);border-radius:10px;padding:12px 14px;margin-top:14px}
+.alert b{color:var(--bad)}.alert ul{margin:6px 0 0;padding-left:18px}.alert a{color:var(--fg)}
+.okbox{background:var(--ok-soft);border-radius:10px;padding:12px 14px;margin-top:14px}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+pre.sum{white-space:pre-wrap;font:13px/1.45 ui-monospace,Menlo,monospace;background:var(--bg);padding:12px;border-radius:10px;max-height:320px;overflow:auto;margin-top:12px}
+.small{font-size:13px;color:var(--muted)}
+footer{margin:30px 0 10px;font-size:12.5px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">A Hundred Hands × Krayons Digital</div>
+    <h1>November posts for sign-off</h1>
+    <p class="lead">Instagram feed reels and stories for 19–30 November 2026, plus a new craft series, “Look closer”.</p>
+    <div class="how">
+      <b>How it works</b>
+      <ol>
+        <li>Add your name.</li>
+        <li>For each post, tap <b>Approved</b> or <b>Changes</b>. If you tap Changes, tell us what to change.</li>
+        <li>Tap <b>Send to Krayons</b> at the end. We'll tell you if anything has been missed.</li>
+      </ol>
+      <p class="small" style="margin:8px 0 0">Your answers are saved on this phone as you go, so you can stop and come back.</p>
+    </div>
+    <label class="f" for="reviewer">Your name</label>
+    <input type="text" id="reviewer" autocomplete="name" placeholder="e.g. Mala">
+    <div class="err" id="reviewer-err" hidden>Please add your name.</div>
+  </header>
+  <main id="list"></main>
+  <section id="needs-sec"></section>
+  <section class="send" id="send">
+    <h2 style="margin-top:0">Send to Krayons</h2>
+    <label class="f" for="general" style="margin-top:4px">Anything else? (optional)</label>
+    <textarea id="general" placeholder="Comments on the month as a whole, or answers to the list above"></textarea>
+    <div class="actions"><button class="btn" id="check" type="button">Send to Krayons</button></div>
+    <div id="result"></div>
+  </section>
+  <footer>Prepared by Krayons Digital, 19 Nov 2026. Questions: WhatsApp +91 99800 80478 or iam@rajeshrajan.in</footer>
+</div>
+<div class="bar"><div class="in">
+  <div class="prog"><div class="t" id="prog-t">0 of 0 reviewed</div><div class="track"><i id="prog-i"></i></div></div>
+  <a class="btn" href="#send">Finish</a>
+</div></div>
+<script>
+const DATA = {"items": [{"id": "p191000", "section": "Thursday 19 November", "when": "Thu 19 Nov · 10:00 · Story", "title": "Teaser: big news at 11 AM", "st": "ready", "stl": "Built", "note": "Frame 1: orange card; add Instagram’s countdown sticker “Big news”, ending 11:00, in the space left for it. Frame 2: 3 s blurred bazaar.", "brief": "", "onscreen": "Big news at 11 AM. Turn on notifications.", "caption": "", "cta": "", "imgs": ["s_t1.jpg", "s_t2.jpg"]}, {"id": "p191100", "section": "Thursday 19 November", "when": "Thu 19 Nov · 11:00 · Reel", "title": "Announcement: A Hundred Hands is coming to Kochi", "st": "ready", "stl": "Built", "note": "Reel30 with music (Festive Pulse). Update the bio to the Kochi bio before posting.", "brief": "20-25 s reel, 9:16.\n0-2 s: hook text \"Kochi, we're coming.\" over the busiest crowd shot.\n2-12 s: 7-8 fast cuts of 1-1.5 s each: crowds, faces, hands at work, textiles, pottery, jewellery, food.\n12-18 s: text \"A Hundred Hands · Kochi\" then \"26-30 January 2027\".\n18-22 s: end card on brand orange: \"Kochi · 26-30 Jan 2027 · Venue announced soon · Follow @ahundredhands\".\nKeep \"Kochi · 26-30 Jan 2027\" small at the bottom from the first frame. No Jayamahal signage in shot: this is a Kochi announcement.\nAudio: an upbeat instrumental from Instagram's own music library (licensed in-app).", "onscreen": "Kochi, we're coming. · A Hundred Hands · Kochi · 26-30 January 2027 · Venue announced soon · Follow @ahundredhands", "caption": "A Hundred Hands is coming to Kochi.\n\nFrom 26 to 30 January 2027, we're bringing handmade to Kochi: things made by hand, and the people who make them. Venue announced soon.\n\nFollow @ahundredhands and turn on notifications so you hear first.\n\n#AHundredHands #Kochi #KochiEvents #Handmade", "cta": "Follow + turn on notifications · Always-on (boost from day 1)", "imgs": ["s_r30_1.jpg", "s_r30_8.jpg", "s_r30_13.jpg", "s_r30_16.jpg", "s_r30_20.jpg"]}, {"id": "p191930", "section": "Thursday 19 November", "when": "Thu 19 Nov · 19:30 · Reel", "title": "Kochi maker call: 15 spaces", "st": "ready", "stl": "Built", "note": "Reel31 with music (Soil and Santoor). KOCHI auto-reply must be live first.", "brief": "15 s reel, 9:16.\n0-2 s: \"Kochi makers and home chefs\" in large text over hands at work.\n2-9 s: 5-6 cuts of about 1.2 s: weaving, painting, shaping clay, embroidery, a dish being plated.\n9-12 s: \"15 spaces · 26-30 Jan 2027\".\n12-15 s: end card on brand orange: \"DM 'KOCHI' to apply · Applications close 15 Dec\".\nCover: \"Kochi makers: 15 spaces\".\nFootage on the Desktop \"A Hundred Hands\" folder: Reels v2 - 22 Oct/AHH_Reel03_Materials.mp4, AHH_Reel22_Come_for_Pottery_and_Crafts.mp4, AHH_Reel18_Treats_and_Sips.mp4; EventFootage/day2.", "onscreen": "Kochi makers and home chefs · 15 spaces · 26-30 Jan 2027 · DM \"KOCHI\" to apply · Applications close 15 Dec", "caption": "Calling Kochi's makers and home chefs.\n\nWe have 15 spaces at A Hundred Hands in Kochi, 26-30 January 2027. They're open to Kochi-based crafters and home chefs, and when they're gone, they're gone.\n\nTo apply, DM us the word KOCHI and we'll send you a few quick questions.\n\nApplications close 15 December.\n\n#AHundredHands #Kochi #KochiEvents #Handmade", "cta": "DM KOCHI to apply · Kochi maker call (Messages)", "imgs": ["s_r31_1.jpg", "s_r31_4.jpg", "s_r31_7.jpg", "s_r31_10.jpg", "s_r31_13p5.jpg"]}, {"id": "p211100", "section": "Feed reels, 21–30 November", "when": "Sat 21 Nov · 11:00 · Reel", "title": "Kochi maker call: who we're looking for", "st": "build", "stl": "To build", "note": "Footage identified (Reels v2: sarees, jewellery, pottery, art).", "brief": "15-20 s reel, 9:16. A list that names each kind of maker, one per beat.\n0-2 s: \"Who we're looking for in Kochi\" over a crowd shot.\n2-14 s: six cards of about 2 s each, each over a matching clip: \"Textiles\" · \"Jewellery\" · \"Pottery\" · \"Art\" · \"Home decor\" · \"Home chefs\".\n14-18 s: end card: \"15 spaces · DM 'KOCHI' · Applications close 15 Dec\".\nCover: \"Kochi: who we're looking for\".", "onscreen": "Kochi: 24 days left to apply · DM \"KOCHI\"", "caption": "Kochi makers and home chefs: 24 days left to apply.\n\nWe're looking for Kochi's crafters, from textiles and jewellery to pottery and art, and home chefs whose food people queue for.\n\nWe have 15 spaces at A Hundred Hands in Kochi, 26-30 January 2027. To apply, DM us the word KOCHI.\n\nApplications close 15 December.\n\n#AHundredHands #Kochi #KochiEvents #Handmade", "cta": "DM KOCHI to apply · Kochi maker call (Messages)", "imgs": []}, {"id": "p211930", "section": "Feed reels, 21–30 November", "when": "Sat 21 Nov · 19:30 · Reel", "title": "Thank you, makers: Textile: Weaves", "st": "input", "stl": "Needs handles", "note": "Weaves makers’ Instagram handles for tagging.", "brief": "20-30 s reel, 9:16. Thank-you to the handloom and weave makers of the Festival of Handmade 2026.\n0-2 s: \"Thank you, weavers\" over a loom or sari close-up.\n2-25 s: one clip per maker, about 2 s each, with the maker's name on screen. Show as many as the footage allows.\nEnd: \"Follow them and keep buying handmade, all year\".\nTag every maker shown (Instagram allows up to 20 tags).", "onscreen": "Thank you, weavers · Festival of Handmade 2026", "caption": "Thank you to our textile: weaves makers for five days of beautiful work at the Festival of Handmade.\n\nTap the tags to follow them and keep buying from them all year round.\n\n#FestivalOfHandmade #TheRiverCollection #AHundredHands", "cta": "Follow the makers · No boost", "imgs": []}, {"id": "p221930", "section": "Feed reels, 21–30 November", "when": "Sun 22 Nov · 19:30 · Reel", "title": "Kochi maker call: home chefs", "st": "input", "stl": "Needs footage", "note": "Food/home-chef clips: we have little food footage.", "brief": "15-20 s reel, 9:16, speaking to home chefs.\n0-2 s: \"Home chefs of Kochi\" over food being cooked or served.\n2-12 s: 5-6 cuts: stirring, frying, plating, people eating at a food stall.\n12-18 s: \"If Kochi already knows your cooking, bring it to A Hundred Hands\" then the end card: \"15 spaces · DM 'KOCHI' · Applications close 15 Dec\".\nCover: \"Home chefs of Kochi\".\nFootage on the Desktop \"A Hundred Hands\" folder: Reels v2 - 22 Oct/AHH_Reel18_Treats_and_Sips.mp4 and the food clips in EventFootage/day2. If there is too little food footage, ask AHH for clips from past food stalls.", "onscreen": "Kochi: 23 days left to apply · DM \"KOCHI\"", "caption": "Kochi makers and home chefs: 23 days left to apply.\n\nHome chefs, this one's for you. If Kochi already knows your cooking, bring it to A Hundred Hands.\n\nWe have 15 spaces at A Hundred Hands in Kochi, 26-30 January 2027. To apply, DM us the word KOCHI.\n\nApplications close 15 December.\n\n#AHundredHands #Kochi #KochiEvents #Handmade", "cta": "DM KOCHI to apply · Kochi maker call (Messages)", "imgs": []}, {"id": "p241330", "section": "Feed reels, 21–30 November", "when": "Tue 24 Nov · 13:30 · Reel", "title": "Kochi maker call: how to apply", "st": "build", "stl": "To build", "note": "Three steps on screen; uses existing hands-at-work footage.", "brief": "15 s. Three steps on screen: 1. DM KOCHI. 2. Answer our questions. 3. Send photos of your work.", "onscreen": "Kochi: 21 days left to apply · DM \"KOCHI\"", "caption": "Kochi makers and home chefs: 21 days left to apply.\n\nApplying takes three steps: DM us KOCHI, answer a few quick questions, and send us photos of your work.\n\nWe have 15 spaces at A Hundred Hands in Kochi, 26-30 January 2027. To apply, DM us the word KOCHI.\n\nApplications close 15 December.\n\n#AHundredHands #Kochi #KochiEvents #Handmade", "cta": "DM KOCHI to apply · Kochi maker call (Messages)", "imgs": []}, {"id": "p241930", "section": "Feed reels, 21–30 November", "when": "Tue 24 Nov · 19:30 · Reel", "title": "Thank you, makers: Home decor and gifts", "st": "input", "stl": "Needs handles", "note": "Home decor and gifts makers’ handles.", "brief": "20-30 s reel of the Home Decor/Gifts makers from festival footage. Tag every maker shown.", "onscreen": "Thank you, makers: Home decor and gifts", "caption": "Thank you to our home decor and gifts makers for five days of beautiful work at the Festival of Handmade.\n\nTap the tags to follow them and keep buying from them all year round.\n\n#FestivalOfHandmade #TheRiverCollection #AHundredHands", "cta": "Follow the makers · No boost", "imgs": []}, {"id": "p261330", "section": "Feed reels, 21–30 November", "when": "Thu 26 Nov · 13:30 · Reel", "title": "Kochi maker call: crafters", "st": "build", "stl": "To build", "note": "Hands-at-work close-ups from festival footage.", "brief": "15-20 s. Close-ups of hands at work: weaving, painting, shaping clay.", "onscreen": "Kochi: 19 days left to apply · DM \"KOCHI\"", "caption": "Kochi makers and home chefs: 19 days left to apply.\n\nCrafters, if you make it by hand in Kochi, we'd love to see it.\n\nWe have 15 spaces at A Hundred Hands in Kochi, 26-30 January 2027. To apply, DM us the word KOCHI.\n\nApplications close 15 December.\n\n#AHundredHands #Kochi #KochiEvents #Handmade", "cta": "DM KOCHI to apply · Kochi maker call (Messages)", "imgs": []}, {"id": "p261930", "section": "Feed reels, 21–30 November", "when": "Thu 26 Nov · 19:30 · Reel", "title": "How it's made: block printing", "st": "input", "stl": "Needs video", "note": "Block-printing process video. We only have photos (Mubeen Ajrakh, J P Handprints Bagru).", "brief": "20-40 s process reel of block printing, from maker videos in Drive or festival footage. Hook: the finished piece in the first second.", "onscreen": "How it's made: block printing", "caption": "How it's made: block printing.\n\nEvery piece you see at A Hundred Hands starts like this, in someone's hands.\n\nFollow @ahundredhands for more makers and their crafts.\n\n#AHundredHands #Handmade #HandmadeInIndia", "cta": "Follow for more · No boost", "imgs": []}, {"id": "p281330", "section": "Feed reels, 21–30 November", "when": "Sat 28 Nov · 13:30 · Reel", "title": "Bazaar reel: come for the bazaar", "st": "build", "stl": "To build", "note": "Bazaar + crowd footage folder.", "brief": "15-25 s fast, scrappy bazaar cut: crowds, faces, stalls (Bazaar+crown footage folder). Kochi dates on screen from the start.", "onscreen": "Come for the bazaar · Kochi · 26-30 Jan", "caption": "Come for the bazaar. Stay for the makers.\n\nNext up: A Hundred Hands in Kochi, 26-30 January 2027. Follow @ahundredhands so you don't miss a thing.\n\n#AHundredHands #Kochi #KochiEvents #Handmade", "cta": "Follow · Always-on (candidate)", "imgs": []}, {"id": "p281930", "section": "Feed reels, 21–30 November", "when": "Sat 28 Nov · 19:30 · Reel", "title": "Thank you, makers: Art", "st": "input", "stl": "Needs handles", "note": "Art makers’ handles.", "brief": "20-30 s reel of the Art makers from festival footage. Tag every maker shown.", "onscreen": "Thank you, makers: Art", "caption": "Thank you to our art makers for five days of beautiful work at the Festival of Handmade.\n\nTap the tags to follow them and keep buying from them all year round.\n\n#FestivalOfHandmade #TheRiverCollection #AHundredHands", "cta": "Follow the makers · No boost", "imgs": []}, {"id": "p291930", "section": "Feed reels, 21–30 November", "when": "Sun 29 Nov · 19:30 · Reel", "title": "Kochi maker call: reminder", "st": "build", "stl": "To build", "note": "15 s countdown style.", "brief": "15 s countdown style.", "onscreen": "Kochi: 16 days left to apply · DM \"KOCHI\"", "caption": "Kochi makers and home chefs: 16 days left to apply.\n\nThe 15 spaces are shared between crafters and home chefs, so don't wait.\n\nWe have 15 spaces at A Hundred Hands in Kochi, 26-30 January 2027. To apply, DM us the word KOCHI.\n\nApplications close 15 December.\n\n#AHundredHands #Kochi #KochiEvents #Handmade", "cta": "DM KOCHI to apply · Kochi maker call (Messages)", "imgs": []}, {"id": "lc_surpur", "section": "New series: Look closer", "when": "Sun 22 Nov · 13:30 · Reel · about 52 s", "title": "Look closer: Surpur line art", "was": "Mala on her bicycle: thank you, and see you in Kochi", "st": "story", "stl": "New idea", "note": "", "brief": "", "onscreen": "", "caption": "How many faces can you count? 👀\nThis is Surpur line art by Krishna Prakash, and every one of those faces is drawn by hand.\n\n🔍 Where is it from?\nSurpur (Shorapur), in Yadgir district, Karnataka. The style grew out of the Vijayanagara painting tradition.\n\n🔍 What should you look for?\n1. The line: fluid and flowing, doing all the work.\n2. The ornament: crowns, jewellery and garments packed with detail.\n3. The figures: long and elegant, a trait inherited from the Vijayanagara painters.\n\n🔍 Wasn't Surpur painting done in gold?\nThe old court paintings were laid with gesso and gold leaf. Krishna Prakash strips it back to pure line, white on black.\n\nLook closer. That's the craft.\nWhich craft should we take apart next? Tell us in the comments.\n\n#SurpurArt #LineArt #KarnatakaArt #IndianArt #HandmadeInIndia #AHundredHands", "cta": "", "needs": "Krishna Prakash’s own photos (Drive: Art / 6. Krishna Prakash – Surpur Art), high-resolution, plus 2 short clips. Enough for the whole reel. <b>Need:<\/b> his Instagram handle to tag, and his OK to feature him.", "frames": [{"img": "sur1.jpg", "n": 1, "t": "0–4 s hook"}, {"img": "sur2.jpg", "n": 2, "t": "4–9 s"}, {"img": "sur3.jpg", "n": 3, "t": "9–17 s"}, {"img": "sur4.jpg", "n": 4, "t": "17–25 s"}, {"img": "sur5.jpg", "n": 5, "t": "25–33 s"}, {"img": "sur6.jpg", "n": 6, "t": "33–40 s insider fact"}, {"img": "sur7.jpg", "n": 7, "t": "40–46 s maker"}, {"img": "sur8.jpg", "n": 8, "t": "46–52 s end card"}]}, {"id": "lc_patta", "section": "New series: Look closer", "when": "Sun 29 Nov · 13:30 · Reel · about 52 s", "title": "Look closer: Pattachitra", "was": "Mala on her bicycle: why buy direct from the maker", "st": "story", "stl": "New idea", "note": "", "brief": "", "onscreen": "", "caption": "No pencil. No sketch. Straight in with the brush. 🖌️\nThis is Pattachitra from Odisha, by Akshaya Bariki.\n\n🔍 What is it painted on?\nCloth, coated with chalk and a glue made from tamarind seeds.\n\n🔍 Where do the colours come from?\nNatural sources: white from conch shell, black from lamp soot, yellow and red from stones and minerals.\n\n🔍 What should you look for?\n1. The canvas is cloth.\n2. The colours come from shells and stones.\n3. There's no pencil sketch: the artist draws straight in with the brush, then frames the scene with ornate borders.\n\n🔍 Where did it begin?\nAt the Jagannath Temple in Puri. During a ritual period when the idols are kept from view, paintings stand in for them. The tradition lives on in Raghurajpur, a village of painters in Odisha.\n\nLook closer. That's the craft.\nWhich craft should we take apart next? Tell us in the comments.\n\n#Pattachitra #Odisha #Raghurajpur #IndianArt #HandmadeInIndia #AHundredHands", "cta": "", "needs": "Akshaya Bariki’s photos (Drive: Art / 1. Akshaya Kumar Bariki and River Collection), mostly WhatsApp-compressed. <b>Need:<\/b> original-resolution photos, ideally a 10–15 s clip of him painting, and his handle.", "frames": [{"img": "pat1.jpg", "n": 1, "t": "0–4 s hook"}, {"img": "pat2.jpg", "n": 2, "t": "4–9 s"}, {"img": "pat3.jpg", "n": 3, "t": "9–17 s"}, {"img": "pat4.jpg", "n": 4, "t": "17–25 s"}, {"img": "pat5.jpg", "n": 5, "t": "25–33 s"}, {"img": "pat6.jpg", "n": 6, "t": "33–40 s insider fact"}, {"img": "pat7.jpg", "n": 7, "t": "40–46 s maker"}, {"img": "pat8.jpg", "n": 8, "t": "46–52 s end card"}]}, {"id": "lc_pashmina", "section": "New series: Look closer", "when": "Proposed for December · Reel · about 48 s", "title": "Look closer: Pashmina", "was": "", "st": "story", "stl": "Proposal", "note": "", "brief": "", "onscreen": "", "caption": "", "cta": "", "needs": "Mohd Saleem Sofi’s photos and a 4-minute loom video (Drive: Textile – Weaves / 9). Grey frames are shots we don’t have yet. <b>Need:<\/b> a 10–15 s clip of hand-spinning, and a close-up of the GI label on one of his shawls with its number visible.", "frames": [{"img": "pas1.jpg", "n": 1, "t": "0–5 s hook"}, {"img": "pas2.jpg", "n": 2, "t": "5–13 s"}, {"img": "pas3.jpg", "n": 3, "t": "13–21 s"}, {"img": "pas4.jpg", "n": 4, "t": "21–29 s"}, {"img": "pas5.jpg", "n": 5, "t": "29–37 s"}, {"img": "pas6.jpg", "n": 6, "t": "37–43 s maker"}, {"img": "pas7.jpg", "n": 7, "t": "43–48 s end card"}]}, {"id": "lc_reserve", "section": "New series: Look closer", "when": "In reserve · two reels, about 42 s and 44 s", "title": "Look closer: Channapatna toys and Dhokra brass", "was": "", "st": "story", "stl": "Idea only", "note": "", "brief": "", "onscreen": "", "caption": "", "cta": "", "needs": "We have <b>no footage<\/b> for either (the Channapatna maker is marked “not coming”), so every frame is a shot we would need. <b>Need for both:<\/b> a maker (and their consent), and process video: the lathe and lacquer for Channapatna; wax threads, pouring and breaking the mould for Dhokra.", "frames": [{"img": "cha1.jpg", "n": 1, "t": "Channapatna · 0–4 s hook"}, {"img": "cha2.jpg", "n": 2, "t": "4–12 s"}, {"img": "cha3.jpg", "n": 3, "t": "12–20 s"}, {"img": "cha4.jpg", "n": 4, "t": "20–28 s"}, {"img": "cha5.jpg", "n": 5, "t": "28–36 s"}, {"img": "cha6.jpg", "n": 6, "t": "36–42 s end card"}, {"img": "dho1.jpg", "n": 1, "t": "Dhokra · 0–4 s hook"}, {"img": "dho2.jpg", "n": 2, "t": "4–12 s"}, {"img": "dho3.jpg", "n": 3, "t": "12–20 s"}, {"img": "dho4.jpg", "n": 4, "t": "20–30 s"}, {"img": "dho5.jpg", "n": 5, "t": "30–38 s insider fact"}, {"img": "dho6.jpg", "n": 6, "t": "38–44 s end card"}]}, {"id": "stories", "section": "Stories, 19–30 November", "when": "16 stories · signed off as one plan", "title": "Stories plan", "st": "build", "stl": "Plan", "note": "", "brief": "", "onscreen": "", "caption": "", "cta": "", "stories": [{"when": "Thu 19 Nov 10:00", "title": "Teaser: big news at 11 AM", "onscreen": "Big news at 11 AM. Turn on notifications.", "note": "Replaces the \"spaces left\" story planned for this slot: it would have run before Kochi was announced. The spaces-left stories start Mon 23 Nov."}, {"when": "Thu 19 Nov 17:00", "title": "Reshare: Kochi announcement", "onscreen": "Kochi · 26-30 Jan 2027. Tap the countdown for a reminder.", "note": ""}, {"when": "Fri 20 Nov 10:00", "title": "Kochi maker call: ask us", "onscreen": "Thinking of applying for Kochi? Ask us anything.", "note": ""}, {"when": "Fri 20 Nov 17:00", "title": "Kochi maker call: answers", "onscreen": "Your questions, answered · DM \"KOCHI\" to apply", "note": ""}, {"when": "Mon 23 Nov 10:00", "title": "Kochi: spaces left", "onscreen": "[count] of 15 spaces left · DM \"KOCHI\"", "note": "Calendar status: Needs AHH input. Add today's count from AHH before posting."}, {"when": "Mon 23 Nov 17:00", "title": "Reshare: latest post", "onscreen": "New on our feed", "note": ""}, {"when": "Tue 24 Nov 10:00", "title": "Reshare: your posts", "onscreen": "From your feeds", "note": ""}, {"when": "Tue 24 Nov 17:00", "title": "Reshare: latest post", "onscreen": "New on our feed", "note": ""}, {"when": "Wed 25 Nov 10:00", "title": "Guess the price", "onscreen": "Guess the price", "note": "Calendar status: Brief only: caption once footage or maker is picked. Pick the piece and its price from the maker."}, {"when": "Wed 25 Nov 17:00", "title": "Guess the price: answer", "onscreen": "The answer is...", "note": "Calendar status: Brief only: caption once footage or maker is picked. Price from the maker."}, {"when": "Thu 26 Nov 10:00", "title": "Kochi: spaces left", "onscreen": "[count] of 15 spaces left · DM \"KOCHI\"", "note": "Calendar status: Needs AHH input. Add today's count from AHH before posting."}, {"when": "Thu 26 Nov 17:00", "title": "Reshare: latest post", "onscreen": "New on our feed", "note": ""}, {"when": "Fri 27 Nov 10:00", "title": "Reshare: your posts", "onscreen": "From your feeds", "note": ""}, {"when": "Fri 27 Nov 17:00", "title": "Reshare: latest post", "onscreen": "New on our feed", "note": ""}, {"when": "Mon 30 Nov 10:00", "title": "Kochi: spaces left", "onscreen": "[count] of 15 spaces left · DM \"KOCHI\"", "note": "Calendar status: Needs AHH input. Add today's count from AHH before posting."}, {"when": "Mon 30 Nov 17:00", "title": "Reshare: latest post", "onscreen": "New on our feed", "note": ""}]}], "needs": [["Spaces left out of 15, on each story day", "Spaces-left stories 23, 26, 30 Nov", "Morning of each"], ["KOCHI auto-reply live in Instagram DMs, with the questions we send", "Maker-call reels", "As soon as possible"], ["Kochi bio OK, and the event name confirmed", "Announcement and bio", "As soon as possible"], ["Stall terms (fee, size, what’s included) so we can answer questions", "Question-sticker stories", "Fri 20 Nov"], ["Instagram handles for the weaves, home decor and gifts, and art makers; Krishna Prakash; Akshaya Bariki", "Thank-you reels; Look closer reels", "Fri 20 Nov"], ["Food clips from past food stalls", "Home chefs reel, 22 Nov", "Fri 20 Nov"], ["Block-printing video (any maker)", "How it’s made, 26 Nov", "Mon 23 Nov"], ["Original photos of Akshaya Bariki’s work, ideally a clip of him painting", "Pattachitra, 29 Nov", "Tue 24 Nov"], ["A piece and its price from one maker", "Guess the price, 25 Nov", "Mon 23 Nov"], ["Pashmina spinning clip and GI-label close-up (Mohd Saleem Sofi)", "December reel", "Early Dec"], ["OK to feature each maker in a Look closer reel", "All Look closer reels", "Before each"]], "sources": [["Surpur line art", "handicrafts.nic.in, AstaGuru and the V&A blog (origin, Vijayanagara roots, line, gesso and gold leaf, figures, ornament); Krishna Prakash’s visiting card (Shahabad, Kalaburagi); Memeraki (pen on paper, white on black)."], ["Pattachitra", "MAP Academy (Jagannath Temple and anasara, Raghurajpur, chalk and tamarind-seed glue, no pencil sketch, natural colours, borders)."], ["Pashmina", "Al Jazeera (11–15 microns, yinder, about two months to spin, about a week to weave); Business Standard, 2013 (GI label, Srinagar lab test, numbered label)."], ["Channapatna", "AIACA (aale mara wood, lathe, Toy Town); The News Minute (vegetable dyes, GI tag). No GI year given: sources disagree."], ["Dhokra", "eSamskriti (about 4,000 years, Mohenjo-daro dancing girl, 1 mm wax threads, mould broken once); AIACA (GI for Bastar, Adilabad, West Bengal)."]]};
+const WA = '919980080478', EMAIL = 'iam@rajeshrajan.in', KEY = 'ahh-nov-signoff-v1';
+const $ = (s, r = document) => r.querySelector(s);
+const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+let state = { reviewer: '', general: '', d: {} };
+try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s && s.d) state = s; } catch (e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
+
+function strip(list) {
+  const s = el('div', 'strip');
+  list.forEach(f => {
+    const fig = el('figure'); const img = el('img'); img.src = 'img/' + f.img; img.alt = f.t || ''; img.loading = 'lazy';
+    fig.append(img);
+    if (f.t) { const c = el('figcaption'); if (f.n) { const b = el('b', null, f.n + ' · '); c.append(b); } c.append(f.t); fig.append(c); }
+    s.append(fig);
+  });
+  return s;
+}
+function field(parent, label, text, cls) {
+  if (!text) return; parent.append(el('div', 'lbl', label)); parent.append(el('div', 'txt ' + (cls || ''), text));
+}
+
+function card(it) {
+  const c = el('article', 'card'); c.id = it.id;
+  const m = el('div', 'meta'); m.append(el('span', 'when', it.when)); m.append(el('span', 'pill ' + it.st, it.stl)); c.append(m);
+  c.append(el('h3', null, it.title));
+  if (it.was) { const w = el('div', 'was'); w.append('Replaces: '); w.append(el('s', null, it.was)); c.append(w); }
+  if (it.note) c.append(el('div', 'note', it.note));
+  if (it.imgs && it.imgs.length) c.append(strip(it.imgs.map(i => ({ img: i }))));
+  if (it.frames) { c.append(strip(it.frames)); c.append(el('div', 'swipe', 'Swipe to see all ' + it.frames.length + ' frames →')); }
+  if (it.needs) { c.append(el('div', 'lbl', 'Footage and what we still need')); const n = el('div', 'txt'); n.innerHTML = it.needs; c.append(n); }
+  if (it.stories) {
+    const t = el('div', 'tbl'); const tb = el('table');
+    tb.innerHTML = '<thead><tr><th>When</th><th>Story</th><th>On screen</th><th>Notes</th></tr></thead>';
+    const body = el('tbody');
+    it.stories.forEach(s => { const r = el('tr'); [['nw', s.when], ['', s.title], ['', s.onscreen], ['', s.note]].forEach(([k, v], i) => { const d = el('td', k); if (i === 1) d.append(el('b', null, v)); else d.textContent = v; r.append(d); }); body.append(r); });
+    tb.append(body); t.append(tb); c.append(t);
+  }
+  if (it.brief || it.onscreen || it.caption) {
+    const d = el('details'); d.append(el('summary', null, it.frames ? 'Read the caption' : 'Brief, on-screen text and caption'));
+    field(d, 'Brief', it.brief); field(d, 'On screen', it.onscreen); field(d, 'Caption', it.caption, 'cap'); field(d, 'CTA · Ads', it.cta);
+    c.append(d);
+  }
+  const ch = el('div', 'choice');
+  const a = el('button', 'ok', 'Approved'), b = el('button', 'ch', 'Changes');
+  a.type = b.type = 'button';
+  const ta = el('textarea'); ta.id = 'r_' + it.id; ta.placeholder = 'What should we change?';
+  const lab = el('label', 'lbl', 'What should we change?'); lab.htmlFor = ta.id;
+  const rem = el('div', 'remark'); rem.append(lab, ta);
+  const err = el('div', 'err'); err.hidden = true;
+  const sync = () => {
+    const v = state.d[it.id] || {};
+    a.setAttribute('aria-pressed', v.s === 'ok'); b.setAttribute('aria-pressed', v.s === 'ch');
+    rem.hidden = v.s !== 'ch'; ta.value = v.r || '';
+    c.classList.toggle('done-ok', v.s === 'ok'); c.classList.toggle('done-ch', v.s === 'ch' && !!(v.r || '').trim());
+  };
+  a.onclick = () => { state.d[it.id] = { s: 'ok', r: (state.d[it.id] || {}).r || '' }; clearErr(); sync(); save(); progress(); };
+  b.onclick = () => { state.d[it.id] = { s: 'ch', r: (state.d[it.id] || {}).r || '' }; clearErr(); sync(); save(); progress(); ta.focus(); };
+  ta.oninput = () => { (state.d[it.id] = state.d[it.id] || { s: 'ch' }).r = ta.value; c.classList.toggle('done-ch', !!ta.value.trim()); if (ta.value.trim()) clearErr(); save(); progress(); };
+  function clearErr() { err.hidden = true; c.classList.remove('missing'); }
+  c._err = err;
+  ch.append(a, b); c.append(ch, rem, err); sync();
+  return c;
+}
+
+const list = $('#list'); let sec = '';
+DATA.items.forEach(it => { if (it.section !== sec) { sec = it.section; list.append(el('h2', null, sec)); } list.append(card(it)); });
+
+// needs + sources
+const ns = $('#needs-sec');
+ns.append(el('h2', null, 'What we need from AHH'));
+const nc = el('div', 'card'); const ul = el('ul', 'needs'); ul.style.margin = '0'; ul.style.paddingLeft = '18px';
+DATA.needs.forEach(([w, f, by]) => { const li = el('li'); li.append(el('b', null, w)); li.append(el('div', 'by', f + ' · by ' + by)); ul.append(li); });
+nc.append(ul); nc.append(el('p', 'small', 'You can reply to any of these in the box at the end.')); ns.append(nc);
+const sd = el('details', 'card src'); sd.append(el('summary', null, 'Where the craft facts come from'));
+sd.append(el('p', 'small', 'Every craft fact on screen or in a caption was checked against these sources on 18 Nov 2026. Claims we couldn’t confirm were left out.'));
+DATA.sources.forEach(([h, t]) => { const p = el('p'); p.append(el('b', null, h + ': ')); p.append(t); sd.append(p); });
+ns.append(sd);
+
+const rv = $('#reviewer'), gen = $('#general');
+rv.value = state.reviewer || ''; gen.value = state.general || '';
+rv.oninput = () => { state.reviewer = rv.value; if (rv.value.trim()) $('#reviewer-err').hidden = true; save(); };
+gen.oninput = () => { state.general = gen.value; save(); };
+
+function nm(it) { return /^\w{3} \d/.test(it.when) ? it.when.split(' · ').slice(0, 2).join(' ') + ' · ' + it.title : it.title; }
+function isDone(it) { const v = state.d[it.id]; return v && (v.s === 'ok' || (v.s === 'ch' && (v.r || '').trim())); }
+function progress() {
+  const n = DATA.items.filter(isDone).length, t = DATA.items.length;
+  $('#prog-t').textContent = n + ' of ' + t + ' reviewed'; $('#prog-i').style.width = (100 * n / t) + '%';
+}
+progress();
+
+function summary() {
+  const ok = [], chg = [];
+  DATA.items.forEach(it => { const v = state.d[it.id]; const name = nm(it); if (v.s === 'ok') ok.push(name); else chg.push([name, v.r.trim()]); });
+  const now = new Date();
+  let s = 'A Hundred Hands · November sign-off\nReviewed by ' + state.reviewer.trim() + ', ' + now.toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) + '\n\n';
+  s += 'CHANGES (' + chg.length + ')\n' + (chg.length ? chg.map(([n, r]) => '• ' + n + '\n  ' + r.replace(/\n/g, '\n  ')).join('\n') : 'None') + '\n\n';
+  s += 'APPROVED (' + ok.length + ')\n' + (ok.length ? ok.map(n => '• ' + n).join('\n') : 'None') + '\n';
+  if (state.general && state.general.trim()) s += '\nOTHER COMMENTS\n' + state.general.trim() + '\n';
+  return s;
+}
+
+$('#check').onclick = () => {
+  const res = $('#result'); res.innerHTML = '';
+  const missing = [];
+  document.querySelectorAll('.card.missing').forEach(c => c.classList.remove('missing'));
+  if (!rv.value.trim()) { $('#reviewer-err').hidden = false; missing.push({ id: 'reviewer', label: 'Your name (at the top)' }); }
+  DATA.items.forEach(it => {
+    const v = state.d[it.id]; const c = document.getElementById(it.id);
+    if (!v || !v.s) { missing.push({ id: it.id, label: nm(it) + ': not marked' }); c.classList.add('missing'); c._err.textContent = 'Tap Approved or Changes.'; c._err.hidden = false; }
+    else if (v.s === 'ch' && !(v.r || '').trim()) { missing.push({ id: it.id, label: nm(it) + ': changes not described' }); c.classList.add('missing'); c._err.textContent = 'Tell us what to change.'; c._err.hidden = false; }
+  });
+  if (missing.length) {
+    const box = el('div', 'alert'); box.setAttribute('role', 'alert');
+    box.append(el('b', null, missing.length === 1 ? '1 item still needs an answer' : missing.length + ' items still need an answer'));
+    const u = el('ul'); missing.forEach(m => { const li = el('li'); const a = el('a', null, m.label); a.href = '#' + m.id; li.append(a); u.append(li); });
+    box.append(u); res.append(box);
+    return;
+  }
+  const s = summary();
+  const box = el('div', 'okbox');
+  box.append(el('b', null, 'All ' + DATA.items.length + ' items answered. Send your answers using one of these:'));
+  const acts = el('div', 'actions');
+  const wa = el('a', 'btn', 'Send on WhatsApp'); wa.href = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(s); wa.target = '_blank'; wa.rel = 'noopener';
+  const em = el('a', 'btn sec', 'Send by email'); em.href = 'mailto:' + EMAIL + '?subject=' + encodeURIComponent('AHH November sign-off: ' + state.reviewer.trim()) + '&body=' + encodeURIComponent(s);
+  const cp = el('button', 'btn sec', 'Copy answers'); cp.type = 'button';
+  const pre = el('pre', 'sum', s);
+  cp.onclick = async () => { try { await navigator.clipboard.writeText(s); cp.textContent = 'Copied'; } catch (e) { const r = document.createRange(); r.selectNodeContents(pre); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); cp.textContent = 'Selected: copy it now'; } };
+  acts.append(wa, em, cp); box.append(acts);
+  box.append(el('p', 'small', 'Your message opens ready to send. Press send in WhatsApp or your mail app to deliver it. If neither opens, copy your answers and send them to +91 99800 80478 or ' + EMAIL + '.'));
+  box.append(pre); res.append(box);
+};
+</script>
+</body>
+</html>
